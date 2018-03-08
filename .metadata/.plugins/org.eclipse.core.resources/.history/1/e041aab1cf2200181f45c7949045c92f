@@ -1,0 +1,392 @@
+package Presentation;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.Timer;
+
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
+
+import Metier.Bug;
+import Metier.Category;
+import Metier.Checkpoint;
+import Metier.DataStorage;
+import Metier.Equipment;
+import Metier.Network;
+import Metier.StrategicPoint;
+import Metier.User;
+
+
+
+public class Controller_detection extends JFrame implements ActionListener
+{	
+	private ArrayList<Category> listCategorys; 
+	private ArrayList<ArrayList<StrategicPoint>> listSPsByCategorys;
+	private ArrayList<Bug> listBugsIntoDatabase;	
+	private ArrayList<User> listAdminUsers;
+	
+	private Category tempCategory;
+	private Equipment tempEquipment;
+	private Network tempNetwork;
+	private DataStorage tempDataStorage;
+	
+	private ArrayList<Timer> listTimer;
+	private boolean checkFTPMeteoFrance;
+	
+    private MainPanel mainP;
+    private CheckPasswordMeteoFrance checkFTPPanel;
+    
+    private Checkpoint treatment;    
+    private FTPClient ftpClient;
+    private String password;
+	 
+	
+	public Controller_detection()
+	{
+		this.setTitle("PredictYourLAN -- Détection des points stratégiques");	
+		this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/logoTaskbar.png")));	
+		
+		this.setResizable(false);		
+		this.setMinimumSize(new Dimension(800, 600));
+		this.setLocationRelativeTo(null);
+		
+		this.listCategorys = new ArrayList<Category>();
+		this.listSPsByCategorys = new ArrayList<ArrayList<StrategicPoint>>(); 
+		this.listBugsIntoDatabase = new ArrayList<Bug>();
+		this.listTimer = new ArrayList<Timer>();
+		this.listAdminUsers = new ArrayList<User>();
+		
+		this.tempCategory = new Category();	
+		this.tempEquipment = new Equipment();
+		this.tempNetwork  = new Network();		
+		this.tempDataStorage = new DataStorage();
+
+		this.checkFTPPanel = new CheckPasswordMeteoFrance();	
+		this.mainP = new MainPanel();
+		
+		this.checkFTPPanel.connectButton.addActionListener(this);
+		this.setContentPane(this.checkFTPPanel);		
+		
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setVisible(true);	
+	}
+	
+	/**
+	 * Start detection, diagnose of each Strategic Points
+	 * Download each category name, eachStrategic points by category and set a timer by category
+	 */
+	
+	public void Start()
+	{		
+		Bug tempBug = new Bug();
+		User tempUser = new User();
+		
+		this.tempCategory.getAll(listCategorys);		
+		tempBug.getAll(this.listBugsIntoDatabase);
+		
+		this.mainP.getInfo().setText("PredictYourLAN server en cours d'exécution...");
+
+		for(int i=0;i<this.listCategorys.size();i++)
+		{							
+			this.listSPsByCategorys.add(new ArrayList<StrategicPoint>());
+			
+		/*	this.tempEquipment.getByCategory(this.listSPsByCategorys.get(i),i+1);										  
+			this.tempNetwork.getByCategory(this.listSPsByCategorys.get(i),i+1);
+			this.tempDataStorage.getByCategory(this.listSPsByCategorys.get(i),i+1);		*/
+			
+			this.tempEquipment.getByCategory(this.listSPsByCategorys.get(i),this.listCategorys.get(i));										  
+			this.tempNetwork.getByCategory(this.listSPsByCategorys.get(i),this.listCategorys.get(i));
+			this.tempDataStorage.getByCategory(this.listSPsByCategorys.get(i),this.listCategorys.get(i));	
+
+			this.listTimer.add(new Timer(listCategorys.get(i).getDelay()*1000*60, null));              // to set time in milliseconds
+
+			this.listTimer.get(i).setRepeats(true);
+			this.listTimer.get(i).start();
+			this.listTimer.get(i).addActionListener(this);
+		}
+		
+		// This last timer to update the Strategic Point List every 10 minutes
+		this.listTimer.add(new Timer(600000,null));
+		this.listTimer.get(6).setRepeats(true);
+		this.listTimer.get(6).start(); 
+		this.listTimer.get(6).addActionListener(this);
+		
+		// Get all user admin for sending alert mail
+		tempUser.getAllUsers(listAdminUsers);
+		for(int i=0;i<this.listAdminUsers.size();i++)
+		{
+			if(this.listAdminUsers.get(i).isAdminAccess() == 0)
+			{
+				this.listAdminUsers.remove(i);
+			}
+		}
+
+	}
+	
+	/**
+	 * Special function to connect on Meteo France FTP Server
+	 * @return true if password is correct, otherwise false
+	 */
+	
+	public boolean ConnectFTPMeteoFrance()
+	{
+		ftpClient = new FTPClient();
+		boolean success = false;
+		String server = "ftp.meteo.fr";
+        int port = 21;
+        String user = "predict";
+		
+        try
+        {
+			ftpClient.connect(server, port);			
+		
+			int replyCode = ftpClient.getReplyCode();
+			if (!FTPReply.isPositiveCompletion(replyCode)) 
+			{
+			    System.out.println("Unable to connect on Meteo France FTP server");
+			    
+			}
+			success = ftpClient.login(user, this.password);
+			if (!success) 
+			{
+	            System.out.println("Could not login to the server");      
+	        } 
+			else 
+			{
+	            System.out.println("Logged into FTP Meteo France server...");
+	        }
+		} 
+        catch (IOException e) 
+        {			
+			e.printStackTrace();
+		}
+       
+        return(success);
+	}
+	
+
+	@Override
+	public void actionPerformed(ActionEvent e) 
+	{		
+		if (e.getSource() == this.mainP.testButton) 
+		{
+		/*	treatment = new Checkpoint(this.listCategorys.get(0),this.listSPsByCategorys.get(0), this.listBugsIntoDatabase, this.mainP,Color.magenta,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+			treatment.execute();
+		*/	
+			treatment = new Checkpoint(this.listCategorys.get(1),this.listSPsByCategorys.get(1), this.listBugsIntoDatabase, this.mainP,Color.magenta,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+			treatment.execute();
+	/*		
+			treatment = new Checkpoint(this.listCategorys.get(2),this.listSPsByCategorys.get(2), this.listBugsIntoDatabase, this.mainP,Color.magenta,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+			treatment.execute();
+			
+			treatment = new Checkpoint(this.listCategorys.get(3),this.listSPsByCategorys.get(3), this.listBugsIntoDatabase, this.mainP,Color.magenta,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+			treatment.execute(); 
+			
+				treatment = new Checkpoint(this.listCategorys.get(4),this.listSPsByCategorys.get(4), this.listBugsIntoDatabase, this.mainP,Color.magenta,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+			treatment.execute(); 
+		
+				treatment = new Checkpoint(this.listCategorys.get(5),this.listSPsByCategorys.get(5), this.listBugsIntoDatabase, this.mainP,Color.magenta,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+			treatment.execute();*/
+		}
+		
+		if (e.getSource() == this.mainP.btnActualisationSp) 
+		{
+			this.listSPsByCategorys.removeAll(listSPsByCategorys);			
+			System.out.println("taille de listSPsByCategorys" + this.listSPsByCategorys.size());
+			
+			for(int j=0;j<this.listCategorys.size();j++)
+			{		
+				this.listTimer.get(j).stop();
+
+				this.listSPsByCategorys.add(new ArrayList<StrategicPoint>());
+				
+				this.tempEquipment.getByCategory(this.listSPsByCategorys.get(j),this.listCategorys.get(j));										  
+				this.tempNetwork.getByCategory(this.listSPsByCategorys.get(j),this.listCategorys.get(j));
+				this.tempDataStorage.getByCategory(this.listSPsByCategorys.get(j),this.listCategorys.get(j));	
+
+				this.listTimer.get(j).start();
+				this.listTimer.get(j).addActionListener(this);
+			}
+			
+			System.out.println("taille de listSPsByCategorys" + this.listSPsByCategorys.size());
+		}
+		
+		if (e.getSource() == this.checkFTPPanel.connectButton) 
+		{
+			this.password = this.checkFTPPanel.getPassword().getText();
+			checkFTPMeteoFrance = ConnectFTPMeteoFrance();
+			 
+			if(checkFTPMeteoFrance == true)
+			{
+				JOptionPane.showMessageDialog(this,"Vous êtes connecté au FTP Météo France. \nLa vérification des lames va pouvoir se réaliser.","Mot de passe OK",JOptionPane.INFORMATION_MESSAGE);
+				
+				this.getContentPane().removeAll();	
+
+				this.mainP.testButton.addActionListener(this);
+		//		this.mainP.btnActualisationSp.addActionListener(this);
+
+				this.setBounds(0, 0, 800, 600);				
+				
+				this.setContentPane(this.mainP);
+				this.validate();
+				
+				Start();
+			}
+			else
+			{
+				
+				int valueReturned = JOptionPane.showConfirmDialog(this,"Le mot de passe saisie n'est pas correct ! \nVoulez-vous recommencer?","Mauvais mot de passe",JOptionPane.YES_NO_OPTION);
+				if(valueReturned != JOptionPane.OK_OPTION)
+				{
+					JOptionPane.showMessageDialog(this,"Les lames issues du FTP de Météo France ne seront pas traitées. \nAppuyez sur OK pour commencer la détection ","Annulation des détections des lames de Météo France",JOptionPane.INFORMATION_MESSAGE);
+					
+					this.getContentPane().removeAll();	
+
+					this.mainP.testButton.addActionListener(this);
+		//			this.mainP.btnActualisationSp.addActionListener(this);
+
+					this.setBounds(0, 0, 800, 600);				
+					
+					this.setContentPane(this.mainP);
+					this.validate();
+					
+					Start();
+				}	
+			}
+		}
+		
+		
+		if(this.getContentPane() == this.mainP)
+			{
+			int i=0;
+			// Category Internet
+			if (e.getSource() == this.listTimer.get(0)) 
+			{
+				treatment = new Checkpoint(this.listCategorys.get(i),this.listSPsByCategorys.get(i), this.listBugsIntoDatabase, this.mainP,Color.orange,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+				treatment.execute();		
+			}	
+			
+			i++;
+			// Category Data Storage
+			if (e.getSource() == this.listTimer.get(1)) 
+			{
+				treatment = new Checkpoint(this.listCategorys.get(i),this.listSPsByCategorys.get(i), this.listBugsIntoDatabase, this.mainP,Color.red,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+				treatment.execute();
+			}
+			
+			i++;
+			// Category Server/Switch
+			if (e.getSource() == this.listTimer.get(2)) 
+			{		
+				treatment = new Checkpoint(this.listCategorys.get(i),this.listSPsByCategorys.get(i), this.listBugsIntoDatabase, this.mainP,Color.blue,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+				treatment.execute();	
+			}
+			
+			i++;
+			// Category Telephony
+			if (e.getSource() == this.listTimer.get(3)) 
+			{
+				treatment = new Checkpoint(this.listCategorys.get(i),this.listSPsByCategorys.get(i), this.listBugsIntoDatabase, this.mainP,Color.gray,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+				treatment.execute();	
+			}
+			
+			i++;
+			// Category Wall screen
+			if (e.getSource() == this.listTimer.get(4)) 
+			{
+				treatment = new Checkpoint(this.listCategorys.get(i),this.listSPsByCategorys.get(i), this.listBugsIntoDatabase, this.mainP,Color.green,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+				treatment.execute();
+			}
+			
+			i++;
+			// Category Printer
+			if (e.getSource() == this.listTimer.get(5)) 
+			{
+				treatment = new Checkpoint(this.listCategorys.get(i),this.listSPsByCategorys.get(i), this.listBugsIntoDatabase, this.mainP,Color.black,ftpClient,checkFTPMeteoFrance,this.listAdminUsers);	
+				treatment.execute();
+			}
+			
+			
+			i++;
+			// Special timer to update the Strategic Point list every 15 minutes
+			if (e.getSource() == this.listTimer.get(6)) 
+			{
+				Calendar cal = Calendar.getInstance();
+			    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");	   	
+		
+			    File f = null;
+				
+				f = new File ("D:\\PredictYourLAN\\log\\"+sdf.format(cal.getTime()).substring(6,10)+"\\"+sdf.format(cal.getTime()).substring(3,5)+"\\"+sdf.format(cal.getTime()).substring(0,2)+"\\log.txt");
+				if(f.exists() == false)
+				{
+					// Creating new directory, with log file
+					new File ("D:\\PredictYourLAN\\log\\"+sdf.format(cal.getTime()).substring(6,10)+"\\"+sdf.format(cal.getTime()).substring(3,5)+"\\"+sdf.format(cal.getTime()).substring(0,2)).mkdirs();	
+				}		  
+				
+				// updating log file
+				try 
+				{
+					FileWriter fw = new FileWriter (f,true);
+					fw.write("\r\n"+sdf.format(cal.getTime())+" ******************    ACTUALISATION LISTE POINTS STRATEGIQUES            *************************");
+					fw.close();
+				} 
+				catch (IOException e1) 
+				{			
+					e1.printStackTrace();
+				}
+				System.out.println("******************    ACTUALISATION LISTE POINTS STRATEGIQUES            *************************");			
+				
+				// stop all timers
+				this.listTimer.get(0).stop(); 
+				this.listTimer.get(1).stop(); 
+				this.listTimer.get(2).stop(); 
+				this.listTimer.get(3).stop(); 
+				this.listTimer.get(4).stop(); 
+				this.listTimer.get(5).stop();
+				this.listTimer.get(6).stop(); 
+				
+				this.listSPsByCategorys.removeAll(this.listSPsByCategorys);		
+				this.listCategorys.removeAll(this.listCategorys);
+				
+				this.tempCategory.getAll(this.listCategorys);	
+				
+				for(int j=0;j<this.listCategorys.size();j++)
+				{		
+					this.listTimer.get(j).stop();
+	
+					this.listSPsByCategorys.add(new ArrayList<StrategicPoint>());
+					
+				/*	this.tempEquipment.getByCategory(this.listSPsByCategorys.get(j),j+1);										  
+					this.tempNetwork.getByCategory(this.listSPsByCategorys.get(j),j+1);
+					this.tempDataStorage.getByCategory(this.listSPsByCategorys.get(j),j+1);		*/
+					
+					this.tempEquipment.getByCategory(this.listSPsByCategorys.get(j),this.listCategorys.get(j));										  
+					this.tempNetwork.getByCategory(this.listSPsByCategorys.get(j),this.listCategorys.get(j));
+					this.tempDataStorage.getByCategory(this.listSPsByCategorys.get(j),this.listCategorys.get(j));	
+
+					this.listTimer.get(j).start();			
+				
+				}
+				
+				this.listTimer.get(6).start(); 
+			}
+		}	
+	}
+	
+
+	
+	
+	
+}

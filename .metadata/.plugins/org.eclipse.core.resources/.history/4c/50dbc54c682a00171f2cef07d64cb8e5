@@ -1,0 +1,184 @@
+package Metier;
+
+import java.util.ArrayList;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import Donnees.GetData;
+import Donnees.UpdateData;
+
+/**
+ * @author Cyril or Will30 (GitHub) or Will15 (GitLab)
+ * @version 1.00
+ * Class for Category: Each strategic point is associated to a category
+ */
+
+public class Category 
+{
+	
+	
+	private int ID;									// auto ID bug (defines into database)
+	private String name;							// name (defines into database)
+	private String description;						// more info about bug encountered (defines into database)
+	private int delay;								// each category have a different time delay to start a new detection
+	private String UNC;								// an UNC to get picture
+	private Led led;
+
+	
+	/**	 
+	 * When created, a bug is associated to solution list
+	 * @since 1.00
+	 */
+	public Category()
+	{
+		this.led = new Led();
+	}
+	
+	/**
+	 * Get all bug for all strategic point
+	 * @param listCategory list of category available in database
+	 * @since 1.00
+	 */
+	public void getAll(ArrayList<Category> listCategory)
+	{	
+		String url ="http://"+StrategicPoint.SERVER_NAME+":"+StrategicPoint.PORT_NUMBER+"/categorys";	
+		
+		GetData getSPs = new GetData();		
+		JSONArray json = getSPs.Start(url);	
+
+		for(int i=0;i<json.length();i++)
+		{
+			try 
+			{	
+				JSONObject jsonObject = json.getJSONObject(i);
+			
+				if(jsonObject.length()>0)				
+				{					   
+					listCategory.add(new Category());	
+					
+					listCategory.get(i).setID(jsonObject.getInt("idcategory"));
+					listCategory.get(i).setName(jsonObject.getString("name"));
+					listCategory.get(i).setDescription(jsonObject.getString("description"));
+					listCategory.get(i).setDelay(jsonObject.getInt("detectionDelay"));
+					listCategory.get(i).setUNC(jsonObject.getString("iconUNC"));	
+					
+					listCategory.get(i).getLed().setUNC( jsonObject.getString("LED_UNC"));
+					listCategory.get(i).getLed().setID((byte) jsonObject.getInt("idLED"));
+				}								
+			} 
+			
+			catch (JSONException e) 
+			{				
+				e.printStackTrace();
+			}	
+		}		
+	}
+	
+	/**
+	 * After the detection, this function will save update LED field into category table
+	 * @param LED LED id
+	 * @return stateConnexion it's an integer with only two values (as a boolean) to know if strategic point has been updated successfully
+	 * @ version 1.00
+	 */
+	public int update(int LED)
+	{
+		String method ="PUT";
+		UpdateData postData = new UpdateData();
+		JSONObject json = new JSONObject(); 		
+		String jsonReturned = null;
+		String Server_Rest_Address = "";
+		JSONObject tempJson = null;
+		int stateConnexion=-1;		
+		
+		Server_Rest_Address = "";
+		try 
+		{			
+			json.put("led",LED);
+		} 
+		catch (JSONException e) 
+		{			
+			e.printStackTrace();
+		}
+		
+		if(json.length()>0)
+		{	
+			Server_Rest_Address = "http://"+StrategicPoint.SERVER_NAME+":"+StrategicPoint.PORT_NUMBER+"/categorys" + "/" + this.getID();
+			
+			jsonReturned = postData.Start(json,Server_Rest_Address,method);  	
+			try 
+			{
+				tempJson = new JSONObject(jsonReturned);
+			} 
+			catch (JSONException e) 
+			{
+				System.out.println("Category.update() unable to convert string to JSON");
+				e.printStackTrace();
+			}
+		}
+		try 
+		{
+			stateConnexion = tempJson.getInt("status");
+		} 
+		catch (JSONException e1) 
+		{
+			System.out.println("Category.update() unable to convert json to int");
+			e1.printStackTrace();
+		}					
+	
+		return (stateConnexion);
+	}
+	
+	/////////////************************    Getters and Setters *************************
+
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int iD) {
+		ID = iD;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getUNC() {
+		return UNC;
+	}
+
+	public void setUNC(String uNC) {
+		UNC = uNC;
+	}
+
+	public Led getLed() {
+		return led;
+	}
+
+	public void setLed(Led led) {
+		this.led = led;
+	}
+
+	public int getDelay() {
+		return delay;
+	}
+
+	public void setDelay(int delay) {
+		this.delay = delay;
+	}
+
+	
+}
