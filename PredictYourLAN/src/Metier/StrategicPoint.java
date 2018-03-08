@@ -1,0 +1,403 @@
+package Metier;
+
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.imageio.ImageIO;
+import javax.xml.bind.DatatypeConverter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
+import Donnees.GetData;
+import Donnees.UpdateData;
+
+/**
+ * 
+ * @author Cyril as Will30 (GitHub) or Will15 (GitLab)
+ * @version 1.06
+ * Abstract class for Strategic Point. A strategic can be an equipment (computer, printer, switch,etc...), a network (this a communication between 
+   two IP addresses) or a data storage.   
+ *
+ */
+
+public abstract class StrategicPoint
+{
+	protected static final String SERVER_NAME = "Server_name";	// NodeJS server name
+	protected static final int PORT_NUMBER = 3001;				// NodeJS port number
+	
+	private int ID;									// auto strategic point ID  (defines into database)
+	private String name;							// strategic point name
+	private String description;						// strategic point description
+	private String IPAddress;						// for example "10.111.60.30"	
+	private String icon=null;
+	
+	protected Led led;
+	protected ArrayList<Bug> listBug;
+	protected Category category;
+		
+	
+	public StrategicPoint() 
+	{
+		
+	}
+	
+	/**
+	 * Get all Strategic points by category from database - this function calls GetData() class
+	 * @param list this is the StrategicPoint's list 
+	 * @param Category category name 
+	 * @since 1.01
+	 */
+	public abstract void getByCategory(ArrayList<StrategicPoint> list, Category Category);
+	
+
+	
+	/**
+	 * Get more info about a strategic point and defines if strategic point is an equipment, network or datastorage
+	 * @since 1.01	 
+	 */
+	public void getMoreInfoforSP()
+	{
+		
+		String url ="http://"+SERVER_NAME+":"+PORT_NUMBER+"/SPs/"+this.getID();
+
+		GetData getSPs = new GetData();		
+		JSONArray json = getSPs.Start(url);	
+			
+		for(int i=0;i<json.length();i++)
+		{
+			try 
+			{	
+				JSONObject jsonObject = json.getJSONObject(i);
+		
+				if(jsonObject.length()>0)
+				{
+					this.setName(jsonObject.getString("name"));
+					this.setDescription(jsonObject.getString("Description")); 
+					this.setIcon(jsonObject.getString("icon")); 
+					this.setIPAddress(jsonObject.getString("IPaddress")); 
+			//		this.getService().setID((byte) jsonObject.getInt("id_Service")); 
+				
+					this.getLed().setID((byte)jsonObject.getInt("id_LED"));
+					this.getLed().setColor(jsonObject.getString("color"));
+					this.getLed().setUNC(jsonObject.getString("UNC"));
+				}
+			} 
+			
+			catch (JSONException e) 
+			{				
+				e.printStackTrace();
+			}	
+		}		
+	}
+	
+	/**
+	 * Get Bug and Solution for SP
+	 * @since 1.01	 
+	 */
+	public void getBugForThisSP()
+	{
+		String method ="POST";
+		UpdateData postData = new UpdateData();
+		JSONObject json = new JSONObject(); 	
+		JSONArray jsonArray;
+		String jsonReturned = null;
+		String Server_Rest_Address = "http://"+SERVER_NAME+":"+PORT_NUMBER+"/bugs/thisSP";
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+		Date date = new Date();
+		JSONObject tempJson = null;
+
+		try 
+		{			
+			json.put("id",this.getID());
+		} 
+		catch (JSONException e) 
+		{			
+			e.printStackTrace();
+		}
+		
+		if(json.length()>0)
+		{				
+			jsonReturned = postData.Start(json,Server_Rest_Address,method);  	
+			try 
+			{
+				jsonArray = new JSONArray(jsonReturned);
+				tempJson = jsonArray.optJSONObject(0);
+			
+				if(String.valueOf(tempJson).equals("null") == false)
+				{
+					this.setListBug();
+					this.getListBug().add(new Bug());
+					
+					// Just get the first bug found
+					this.listBug.get(0).setDate(tempJson.getString("beginningDateBUG"));
+					this.listBug.get(0).setDetail(tempJson.getString("erreur"));
+					this.listBug.get(0).getListSolution().get(0).setDescription(tempJson.getString("solution"));
+				}
+			} 
+			catch (JSONException e1) 
+			{			
+				e1.printStackTrace();
+			}					
+		}
+	}
+	
+	/**
+	 * Add a new strategic point into database
+	 * @since 1.01
+	 * @return stateConnexion it's an integer with only two values (as a boolean) to know if strategic point has been added successfully
+	 */
+	
+	public abstract int add();
+	
+	/**
+	 * Start command ping and detect if Strategic point is available
+	 * @param listBugIntoDatabase all bug list available/possible from database
+	 * @since 1.03 Modify for network
+	 */
+	
+	public abstract void detectSP(ArrayList<Bug> listBugIntoDatabase);
+	
+	
+	/**
+	 * Converts image (byte[]) to String base64
+	 * @param file file is an image. Then, this image will be converting into string base64 
+	 */
+	public void convertImageToBase64(File file)
+	{
+		String encodedImage = null;
+		BufferedImage originalImage;
+
+		try 
+		{
+			originalImage = ImageIO.read(file);
+			ByteArrayOutputStream baos=new ByteArrayOutputStream();
+			ImageIO.write(originalImage, "png", baos );
+			encodedImage = DatatypeConverter.printBase64Binary(baos.toByteArray());
+			
+			
+		} catch (IOException e) 
+		{
+			
+			e.printStackTrace();
+		}
+	
+		this.setIcon(encodedImage);
+	}
+	
+	
+	/**
+	 * After the detection, this function will save new Strategic points's LED into database
+	 * @return stateConnexion it's an integer with only two values (as a boolean) to know if strategic point has been updated successfully
+	 * @version 1.00
+	 */
+	public int update()
+	{
+		String method ="PUT";
+		UpdateData postData = new UpdateData();
+		JSONObject json = new JSONObject(); 		
+		String jsonReturned = null;
+		String Server_Rest_Address = "";
+		JSONObject tempJson = null;
+		int stateConnexion=-1;		
+		
+		Server_Rest_Address = "";
+		try 
+		{			
+			json.put("name",this.getName());
+			json.put("description",this.getDescription());
+			json.put("icon",this.getIcon());
+			json.put("IPaddress",this.getIPAddress());
+			json.put("id_LED",this.getLed().getID());
+		//	json.put("idCategory",this.getCategory().getID());
+	
+		} 
+		catch (JSONException e) 
+		{			
+			e.printStackTrace();
+		}
+		
+		if(json.length()>0)
+		{	
+			Server_Rest_Address = "http://"+SERVER_NAME+":"+PORT_NUMBER+"/SPs" + "/" + this.getID();
+			
+			jsonReturned = postData.Start(json,Server_Rest_Address,method);  	
+			try 
+			{
+				tempJson = new JSONObject(jsonReturned);
+			} 
+			catch (JSONException e) 
+			{
+				System.out.println("SP.update() unable to convert string to JSON");
+				e.printStackTrace();
+			}
+		}
+		try 
+		{
+			stateConnexion = tempJson.getInt("status");
+		} 
+		catch (JSONException e1) 
+		{
+			System.out.println("SP.update() unable to convert json to int");
+			e1.printStackTrace();
+		}					
+	
+		return (stateConnexion);
+	}
+	
+	/**
+	 * Delete a strategic point
+	 * @version 1.00
+	 */
+	public void delete()
+	{		
+		String method ="DELETE";
+		UpdateData deleteData = new UpdateData();
+		
+		String url="http://"+SERVER_NAME+":"+PORT_NUMBER+"/SPs/"+this.getID();				
+		deleteData.Start(null, url, method);
+	}
+	
+	/**
+	 * After the detection and if bug is detected, it will create this bug in the database
+	 * @return stateConnexion it's an integer with only two values (as a boolean) to know if bug has been created successfully
+	 * @version 1.00
+	 */
+	public int createBugIntoDatabase()
+	{
+		String method ="POST";
+		UpdateData postData = new UpdateData();
+		JSONObject json = new JSONObject(); 		
+		String jsonReturned = null;
+		String Server_Rest_Address = "";
+		JSONObject tempJson = null;
+		int stateConnexion=-1;		
+
+		Server_Rest_Address = "";
+		try 
+		{
+			json.put("beginningDateBUG",this.getListBug().get(0).getDate());
+			json.put("idSP",this.getID());
+			json.put("idBug",this.getListBug().get(0).getID());
+			json.put("active",1);
+
+		} 
+		catch (JSONException e) 
+		{			
+			e.printStackTrace();
+		}
+		
+		if(json.length()>0)
+		{	
+			Server_Rest_Address = "http://"+SERVER_NAME+":"+PORT_NUMBER+"/SPs" + "/" + this.getID();
+			
+			jsonReturned = postData.Start(json,Server_Rest_Address,method);  	
+			try 
+			{
+				tempJson = new JSONObject(jsonReturned);
+			} 
+			catch (JSONException e) 
+			{
+				System.out.println("SP.update() unable to convert string to JSON");
+				e.printStackTrace();
+			}
+		}
+		try 
+		{
+			stateConnexion = tempJson.getInt("status");
+		} 
+		catch (JSONException e1) 
+		{
+			System.out.println("SP.update() unable to convert json to int");
+			e1.printStackTrace();
+		}					
+	
+		return (stateConnexion);
+		
+	}
+	
+	
+	/////////////************************    Getters and Setters *************************
+
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int iD) {
+		ID = iD;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getIPAddress() {
+		return IPAddress;
+	}
+
+	public void setIPAddress(String iPAddress) {
+		IPAddress = iPAddress;
+	}
+
+	public String getIcon() {
+		return icon;
+	}
+
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
+
+	public Led getLed() {
+		return led;
+	}
+
+	public void setLed() {
+		// Not used
+	}
+
+
+	
+
+
+	public ArrayList<Bug> getListBug() {
+		return listBug;
+	}
+
+	public void setListBug() {
+		this.listBug =  new ArrayList<Bug>();
+	}
+
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+
+	
+	
+	
+}

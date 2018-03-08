@@ -1,0 +1,1222 @@
+package Presentation;
+
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.xml.bind.DatatypeConverter;
+
+import Metier.DataStorage;
+import Metier.Equipment;
+import Metier.Network;
+import Metier.StrategicPoint;
+
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.FlowLayout;
+import javax.swing.border.BevelBorder;
+import java.awt.CardLayout;
+import javax.swing.JTextPane;
+import java.awt.SystemColor;
+
+/**
+ * 
+ * @author Cyril or Will30 (GitHub) or Will15 (GitLab)
+ * @version 1.00
+ * Main class. It consists of strategic points list with associated LED. LED switches on in different colors (green, orange, red or black) if bug is found.
+ * Several Buttons are on the right side to manage users, add a new strategic point, or to see more details for a strategic point
+ *
+ */
+
+@SuppressWarnings("serial")
+public class SecondaryWindow extends JPanel implements ActionListener
+{
+	public JPanel contentPane;
+		
+	private JPanel panel_c1;
+	private JPanel panel_c2;
+	private JPanel panel_c3;
+	
+	private JPanel panel_c22;
+	private JPanel panel_c23;
+	private JPanel panel_c24;
+	private JPanel panel_c25;
+	private JPanel panel_c26;
+	private JPanel panel_c27;
+	private JPanel panel_c28;
+	
+	private JCheckBox checkBox_1;
+	private JCheckBox checkBox_2;
+	private JCheckBox checkBox_3;
+	private JCheckBox checkBox_4;
+	private JCheckBox checkBox_5;
+	private JCheckBox checkBox_6;
+	private JCheckBox checkBox_7;
+	
+	private JLabel labelIcon1;
+	private JLabel labelIcon2;
+	private JLabel labelIcon3;
+	private JLabel labelIcon4;
+	private JLabel labelIcon5;
+	private JLabel labelIcon6;
+	private JLabel labelIcon7;
+	
+	private JLabel labelLed1;
+	private JLabel labelLed2;
+	private JLabel labelLed3;
+	private JLabel labelLed4;
+	private JLabel labelLed5;
+	private JLabel labelLed6;
+	private JLabel labelLed7;
+
+	private JLabel labelName1;
+	private JLabel labelName2;	
+	private JLabel labelName3;	
+	private JLabel labelName4;	
+	private JLabel labelName5;
+	private JLabel labelName6;
+	private JLabel labelName7;
+	
+	private JPanel panel_c221;
+	private JPanel panel_c231;
+	private JPanel panel_c241;
+	private JPanel panel_c251;
+	private JPanel panel_c271;
+	private JPanel panel_c261;
+	private JPanel panel_c281;
+	
+	public JButton addSPButton;
+	public JButton schemaButton;
+	public JButton deleteSPButton;
+	public JButton returnButton;
+	public JButton previousButton;
+	public JButton nextButton;
+
+	private int indexDisplay = 0;
+
+	private Image backgroundImage;
+	
+	private JPanel panel_c29;
+	
+	
+	private ArrayList<StrategicPoint> listSPs;
+	
+	/**
+	 * Create the frame.
+	 */
+	public SecondaryWindow() 
+	{					
+			this.setBorder(new EmptyBorder(5, 5, 5, 5));		
+			this.setLayout(new BorderLayout(0, 0));
+			
+			JPanel northPanel = new JPanel();
+			northPanel.setBackground(new Color(240,240,240));
+			northPanel.setOpaque(false);
+			this.add(northPanel, BorderLayout.NORTH);
+			northPanel.setLayout(new GridLayout(0, 3, 0, 0));
+			
+			JPanel panel_N1 = new JPanel();
+			panel_N1.setBackground(Color.WHITE);
+			panel_N1.setOpaque(false);
+			northPanel.add(panel_N1);
+			panel_N1.setLayout(new BoxLayout(panel_N1, BoxLayout.X_AXIS));
+			
+			JLabel lblNewLabel_111 = new JLabel(new ImageIcon(SecondaryWindow.class.getResource("/images/logoEnterprise.jpg")));
+			lblNewLabel_111.setAlignmentY(0.0f);
+			lblNewLabel_111.setHorizontalAlignment(SwingConstants.CENTER);
+			panel_N1.add(lblNewLabel_111);
+			
+			JPanel panel_N2 = new JPanel();
+			panel_N2.setOpaque(false);
+			panel_N2.setBackground(new Color(240,240,240));
+			northPanel.add(panel_N2);
+			panel_N2.setLayout(new BorderLayout(0, 0));
+			
+			JPanel panel_N3 = new JPanel();
+			panel_N3.setBackground(Color.WHITE);
+			panel_N3.setOpaque(false);
+			northPanel.add(panel_N3);
+			panel_N3.setLayout(new BorderLayout(0, 0));
+			
+			JLabel lblNewLabel_121 = new JLabel(new ImageIcon(SecondaryWindow.class.getResource("/images/logo2.png")));
+			lblNewLabel_121.setBackground(Color.WHITE);
+			lblNewLabel_121.setHorizontalAlignment(SwingConstants.RIGHT);
+			panel_N3.add(lblNewLabel_121);
+			lblNewLabel_121.setForeground(Color.WHITE);
+			lblNewLabel_121.setFont(new Font("Snap ITC", Font.PLAIN, 32));
+			
+			JPanel centerPanel = new JPanel();
+			centerPanel.setOpaque(false);
+			centerPanel.setBorder(null);
+			
+			centerPanel.setBackground(Color.WHITE);
+			this.add(centerPanel, BorderLayout.CENTER);
+			GridBagLayout gbl_centerPanel = new GridBagLayout();
+			gbl_centerPanel.columnWidths = new int[] {500, 700, 80};
+			gbl_centerPanel.rowHeights = new int[] {880};
+			gbl_centerPanel.columnWeights = new double[]{0.0, 0.0, 0.0};
+			gbl_centerPanel.rowWeights = new double[]{0.0};
+			centerPanel.setLayout(gbl_centerPanel);
+			
+			panel_c1 = new JPanel();
+			panel_c1.setOpaque(false);
+			panel_c1.setLayout(null);
+			GridBagConstraints gbc_panel_c1 = new GridBagConstraints();
+			gbc_panel_c1.weighty = 1.0;
+			
+			gbc_panel_c1.weightx = 1.0;
+			gbc_panel_c1.fill = GridBagConstraints.BOTH;
+			gbc_panel_c1.gridx = 0;
+			gbc_panel_c1.gridy = 0;
+			centerPanel.add(panel_c1, gbc_panel_c1);
+			
+			JPanel panel_c11 = new JPanel();
+			panel_c11.setBounds(20, 70, 250, 30);
+			panel_c11.setBackground(new Color(1f, 1f, 1f, 0.8f));
+			panel_c1.add(panel_c11);
+			panel_c11.setLayout(new BorderLayout(0, 0));
+			
+			JLabel lblNewLabel = new JLabel("Liste \u00E9v\u00E8nement en cours:");
+			lblNewLabel.setBackground(Color.WHITE);
+			panel_c11.add(lblNewLabel);
+			lblNewLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+			
+			JTextPane textPane = new JTextPane();
+			textPane.setBackground(new Color(1f, 1f, 1f));
+			textPane.setBounds(20, 100, 400, 750);			
+			panel_c1.add(textPane);
+			
+			panel_c2 = new JPanel();
+			
+			GridBagConstraints gbc_panel_c2 = new GridBagConstraints();
+			gbc_panel_c2.weighty = 1.0;
+			gbc_panel_c2.weightx = 1.0;
+			gbc_panel_c2.fill = GridBagConstraints.BOTH;
+			gbc_panel_c2.gridx = 1;
+			gbc_panel_c2.gridy = 0;
+			centerPanel.add(panel_c2, gbc_panel_c2);
+			panel_c2.setLayout(new GridLayout(9, 1, 0, 0));
+			
+			JPanel panel_c21 = new JPanel();
+			panel_c2.add(panel_c21);
+			panel_c21.setLayout(null);
+			
+			panel_c22 = new JPanel();
+			panel_c2.add(panel_c22);
+			panel_c22.setLayout(null);
+			
+			checkBox_1 = new JCheckBox(""); 		
+			checkBox_1.setBounds(0, 20, 20, 20);
+			panel_c22.add(checkBox_1);
+			
+			labelIcon1 = new JLabel("");
+			labelIcon1.setBounds(30, 0, 100, 80);
+			panel_c22.add(labelIcon1);
+			
+			labelLed1 = new JLabel("");
+			labelLed1.setBounds(150, 0, 60, 60);
+			panel_c22.add(labelLed1);
+			
+			panel_c221 = new JPanel();
+			panel_c221.setBounds(230, 0, 400, 60);
+			panel_c221.setBorder(new BevelBorder(BevelBorder.LOWERED, new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0)));
+			panel_c221.setBackground(Color.WHITE);
+			panel_c22.add(panel_c221);
+			panel_c221.setLayout(new CardLayout(0, 0));
+			
+			labelName1 = new JLabel("New label");
+			labelName1.setBackground(new Color(1f, 1f, 1f, 0.4f));
+			labelName1.setHorizontalAlignment(SwingConstants.CENTER);
+			labelName1.setFont(new Font("Arial", Font.PLAIN, 20));
+			panel_c221.add(labelName1, "name_113882069678884");
+			
+			panel_c23 = new JPanel();
+			panel_c2.add(panel_c23);
+			panel_c23.setLayout(null);
+			
+			checkBox_2 = new JCheckBox(""); 		
+			checkBox_2.setBounds(0, 20, 20, 20);
+			panel_c23.add(checkBox_2);
+			
+			labelIcon2 = new JLabel("");
+			labelIcon2.setBounds(30, 0, 100, 80);
+			panel_c23.add(labelIcon2);
+			
+			labelLed2 = new JLabel("");
+			labelLed2.setBounds(150, 0, 60, 60);
+			panel_c23.add(labelLed2);
+			
+			panel_c231 = new JPanel();
+			panel_c231.setBounds(230, 0, 400, 60);
+			panel_c231.setBorder(new BevelBorder(BevelBorder.LOWERED, new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0)));
+			panel_c231.setBackground(Color.WHITE);
+			panel_c23.add(panel_c231);
+			panel_c231.setLayout(new CardLayout(0, 0));
+			
+			labelName2 = new JLabel("New label");
+			labelName2.setHorizontalAlignment(SwingConstants.CENTER);
+			labelName2.setFont(new Font("Arial", Font.PLAIN, 20));
+			panel_c231.add(labelName2, "name_114187306957180");
+			
+			panel_c24 = new JPanel();
+			panel_c2.add(panel_c24);
+			panel_c24.setLayout(null);
+			
+			checkBox_3 = new JCheckBox(""); 		
+			checkBox_3.setBounds(0, 20, 20, 20);
+			panel_c24.add(checkBox_3);
+			
+			labelIcon3 = new JLabel("");
+			labelIcon3.setBounds(30, 0, 100, 80);
+			panel_c24.add(labelIcon3);
+			
+			labelLed3 = new JLabel("");
+			labelLed3.setBounds(150, 0, 60, 60);
+			panel_c24.add(labelLed3);
+			
+			panel_c241 = new JPanel();
+			panel_c241.setBounds(230, 0, 400, 60);
+			panel_c241.setBorder(new BevelBorder(BevelBorder.LOWERED, new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0)));
+			panel_c241.setBackground(Color.WHITE);
+			panel_c24.add(panel_c241);
+			panel_c241.setLayout(new CardLayout(0, 0));
+			
+			labelName3 = new JLabel("New label");
+			labelName3.setHorizontalAlignment(SwingConstants.CENTER);
+			labelName3.setFont(new Font("Arial", Font.PLAIN, 20));
+			panel_c241.add(labelName3, "name_114214545317206");
+			
+			panel_c25 = new JPanel();
+			panel_c2.add(panel_c25);
+			panel_c25.setLayout(null);
+			
+			checkBox_4 = new JCheckBox(""); 		
+			checkBox_4.setBounds(0, 20, 20, 20);
+			panel_c25.add(checkBox_4);
+			
+			labelIcon4 = new JLabel("");
+			labelIcon4.setBounds(30, 0, 100, 80);
+			panel_c25.add(labelIcon4);
+			
+			labelLed4 = new JLabel("");
+			labelLed4.setBounds(150, 0, 60, 60);
+			panel_c25.add(labelLed4);
+			
+			panel_c251 = new JPanel();
+			panel_c251.setBounds(230, 0, 400, 60);
+			panel_c251.setBorder(new BevelBorder(BevelBorder.LOWERED, new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0)));
+			panel_c251.setBackground(Color.WHITE);
+			panel_c25.add(panel_c251);
+			panel_c251.setLayout(new CardLayout(0, 0));
+			
+			labelName4 = new JLabel("New label");
+			labelName4.setHorizontalAlignment(SwingConstants.CENTER);
+			labelName4.setFont(new Font("Arial", Font.PLAIN, 20));
+			panel_c251.add(labelName4, "name_114216846661158");
+			
+			panel_c26 = new JPanel();
+			panel_c2.add(panel_c26);
+			panel_c26.setLayout(null);
+			
+			checkBox_5 = new JCheckBox(""); 		
+			checkBox_5.setBounds(0, 20, 20, 20);
+			panel_c26.add(checkBox_5);
+			
+			labelIcon5 = new JLabel("");
+			labelIcon5.setBounds(30, 0, 100, 80);
+			panel_c26.add(labelIcon5);
+			
+			labelLed5 = new JLabel("");
+			labelLed5.setBounds(150, 0, 60, 60);
+			panel_c26.add(labelLed5);
+			
+			panel_c261 = new JPanel();
+			panel_c261.setBounds(230, 0, 400, 60);
+			panel_c261.setBorder(new BevelBorder(BevelBorder.LOWERED, new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0)));
+			panel_c261.setBackground(Color.WHITE);
+			panel_c26.add(panel_c261);
+			panel_c261.setLayout(new CardLayout(0, 0));
+			
+			labelName5 = new JLabel("New label");
+			labelName5.setHorizontalAlignment(SwingConstants.CENTER);
+			labelName5.setFont(new Font("Arial", Font.PLAIN, 20));
+			panel_c261.add(labelName5, "name_114218970204526");
+			
+			panel_c27 = new JPanel();
+			panel_c2.add(panel_c27);
+			panel_c27.setLayout(null);
+			
+			checkBox_6 = new JCheckBox(""); 		
+			checkBox_6.setBounds(0, 20, 20, 20);
+			panel_c27.add(checkBox_6);
+			
+			labelIcon6 = new JLabel("");
+			labelIcon6.setBounds(30, 0, 100, 80);
+			panel_c27.add(labelIcon6);
+			
+			labelLed6 = new JLabel("");
+			labelLed6.setBounds(150, 0, 60, 60);
+			panel_c27.add(labelLed6);
+			
+			panel_c271 = new JPanel();
+			panel_c271.setBounds(230, 0, 400, 60);
+			panel_c271.setBorder(new BevelBorder(BevelBorder.LOWERED, new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0)));
+			panel_c271.setBackground(Color.WHITE);
+			panel_c27.add(panel_c271);
+			panel_c271.setLayout(new CardLayout(0, 0));
+			
+			labelName6 = new JLabel("New label");
+			labelName6.setHorizontalAlignment(SwingConstants.CENTER);
+			labelName6.setFont(new Font("Arial", Font.PLAIN, 20));
+			panel_c271.add(labelName6, "name_114221551954349");
+			
+			panel_c28 = new JPanel();
+			panel_c2.add(panel_c28);
+			panel_c28.setLayout(null);
+			
+			checkBox_7 = new JCheckBox(""); 		
+			checkBox_7.setBounds(0, 20, 20, 20);
+			panel_c28.add(checkBox_7);
+			
+			labelIcon7 = new JLabel("");
+			labelIcon7.setBounds(30, 0, 100, 80);
+			panel_c28.add(labelIcon7);
+			
+			labelLed7 = new JLabel("");
+			labelLed7.setBounds(150, 0, 60, 60);
+			panel_c28.add(labelLed7);
+			
+			panel_c281 = new JPanel();
+			panel_c281.setBounds(230, 0, 400, 60);
+			panel_c281.setBorder(new BevelBorder(BevelBorder.LOWERED, new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0), new Color(0, 0, 0)));
+			panel_c281.setBackground(Color.WHITE);
+			panel_c28.add(panel_c281);
+			panel_c281.setLayout(new CardLayout(0, 0));
+			
+			labelName7 = new JLabel("New label");
+			labelName7.setHorizontalAlignment(SwingConstants.CENTER);
+			labelName7.setFont(new Font("Arial", Font.PLAIN, 20));
+			panel_c281.add(labelName7, "name_114225123811234");
+			
+			panel_c3 = new JPanel();
+			GridBagConstraints gbc_panel_c3 = new GridBagConstraints();
+			gbc_panel_c3.weighty = 1.0;
+			gbc_panel_c3.weightx = 1.0;
+			gbc_panel_c3.fill = GridBagConstraints.BOTH;
+			gbc_panel_c3.gridx = 2;
+			gbc_panel_c3.gridy = 0;
+			centerPanel.add(panel_c3, gbc_panel_c3);
+			panel_c3.setLayout(new GridLayout(5, 1, 0, 0));
+			
+			JPanel panel_c31 = new JPanel();
+			panel_c3.add(panel_c31);
+			
+			JPanel panel_c32 = new JPanel();
+			panel_c32.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+			panel_c3.add(panel_c32);
+			
+			JPanel panel_c33 = new JPanel();
+			panel_c33.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+			panel_c3.add(panel_c33);
+			
+			JPanel panel_c34 = new JPanel();		
+			panel_c34.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+			panel_c3.add(panel_c34);
+			
+			JPanel panel_c35 = new JPanel();
+			panel_c35.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+			panel_c3.add(panel_c35);
+			
+			panel_c31.setOpaque(false);
+			
+			panel_c32.setOpaque(false);
+			schemaButton = new JButton(new ImageIcon(SecondaryWindow.class.getResource("/images/button/schemaButton.png")));
+			schemaButton.setBackground(SystemColor.textHighlight);
+			panel_c32.add(schemaButton);
+			
+			panel_c33.setOpaque(false);	
+			addSPButton = new JButton(new ImageIcon(SecondaryWindow.class.getResource("/images/button/addSPButton.png")));
+			addSPButton.setBackground(SystemColor.textHighlight);
+			panel_c33.add(addSPButton);
+			
+			panel_c34.setOpaque(false);			
+			deleteSPButton = new JButton(new ImageIcon(SecondaryWindow.class.getResource("/images/button/deleteButton.png")));
+			deleteSPButton.setBackground(SystemColor.textHighlight);
+			panel_c34.add(deleteSPButton);			
+			
+			panel_c35.setOpaque(false);
+			returnButton =  new JButton(new ImageIcon(SecondaryWindow.class.getResource("/images/button/returnButton.png")));		
+			returnButton.setBackground(SystemColor.textHighlight);
+			panel_c35.add(returnButton);
+
+			panel_c2.setOpaque(false);
+			panel_c3.setOpaque(false);	
+			panel_c21.setOpaque(false);
+			panel_c22.setOpaque(false);
+			panel_c23.setOpaque(false);
+			panel_c24.setOpaque(false);
+			panel_c25.setOpaque(false);
+			panel_c26.setOpaque(false);
+			panel_c27.setOpaque(false);
+			panel_c28.setOpaque(false);
+			
+			panel_c29 = new JPanel();
+			panel_c29.setOpaque(false);
+			FlowLayout flowLayout = (FlowLayout) panel_c29.getLayout();
+			flowLayout.setHgap(200);
+			panel_c2.add(panel_c29);
+			
+			previousButton = new JButton(new ImageIcon(SecondaryWindow.class.getResource("/images/button/previousButton.png")));
+			this.previousButton.setVisible(false);
+			panel_c29.add(previousButton);
+			
+			nextButton = new JButton(new ImageIcon(SecondaryWindow.class.getResource("/images/button/nextButton.png")));		
+			this.nextButton.setVisible(false);
+			panel_c29.add(nextButton);
+			
+
+			
+			InputStream is = this.getClass().getClassLoader().getResourceAsStream("images/background.jpg");
+			try 
+			{			
+					this.backgroundImage = ImageIO.read(is);
+				
+			} 
+			catch (IOException e) 
+			{
+			
+				e.printStackTrace();
+			}
+			this.backgroundImage = this.backgroundImage.getScaledInstance(Controller.screenWidth,Controller.screenHeight,Image.SCALE_DEFAULT);		
+			
+			// if you want to display a new category, delete these 4 lines
+			panel_c28.setVisible(false);
+			labelIcon7.setVisible(false);
+			labelLed7.setVisible(false);
+			labelName7.setVisible(false);
+			
+			this.schemaButton.addActionListener(this);
+			this.previousButton.addActionListener(this);
+			this.nextButton.addActionListener(this);
+	}
+	
+	@Override
+	protected void paintComponent(Graphics g) 
+	{
+		super.paintComponent(g);
+		g.drawImage(this.backgroundImage, 0, 0, null);			
+	}
+	
+	/**
+	 * Displays all strategic point with associated LED
+	 * @param TempListSPs is a strategic point list updated when application starts,
+	 * @param compteur allows to see more strategic point (value possible are: 0,7,14,21,etc...). If TempListSPs size is more than seven "previous button" and "next button" appears
+	 * 		 
+	 * @since 1.00
+	 *  
+	 */
+	public void displaySPs(ArrayList<StrategicPoint> TempListSPs, int compteur)
+	{
+		listSPs = TempListSPs;
+		if(TempListSPs.size()>7)
+		{
+			this.previousButton.setVisible(true);
+			this.nextButton.setVisible(true);
+		}
+		
+		this.labelIcon1.setVisible(false);
+		this.labelLed1.setVisible(false);
+		this.labelName1.setVisible(false);
+		this.checkBox_1.setVisible(false);
+		this.panel_c221.setVisible(false);
+		
+		this.labelIcon2.setVisible(false);
+		this.labelLed2.setVisible(false);
+		this.labelName2.setVisible(false);
+		this.checkBox_2.setVisible(false);	
+		this.panel_c231.setVisible(false);
+		
+		this.labelIcon3.setVisible(false);
+		this.labelLed3.setVisible(false);
+		this.labelName3.setVisible(false);
+		this.checkBox_3.setVisible(false);
+		this.panel_c241.setVisible(false);
+		
+		this.labelIcon4.setVisible(false);
+		this.labelLed4.setVisible(false);
+		this.labelName4.setVisible(false);
+		this.checkBox_4.setVisible(false);
+		this.panel_c251.setVisible(false);
+		
+		this.labelIcon5.setVisible(false);
+		this.labelLed5.setVisible(false);
+		this.labelName5.setVisible(false);
+		this.checkBox_5.setVisible(false);
+		this.panel_c261.setVisible(false);
+		
+		this.labelIcon6.setVisible(false);
+		this.labelLed6.setVisible(false);
+		this.labelName6.setVisible(false);
+		this.checkBox_6.setVisible(false);
+		this.panel_c271.setVisible(false);
+		
+		this.labelIcon7.setVisible(false);
+		this.labelLed7.setVisible(false);
+		this.labelName7.setVisible(false);
+		this.checkBox_7.setVisible(false);
+		this.panel_c281.setVisible(false);
+		
+		//Sort by urgency order
+		boolean order = false;
+		Equipment tempEquipment = new Equipment();
+		Network tempNetwork = new Network();
+		DataStorage tempDataStorage = new DataStorage();
+		
+		do
+		{
+			order = true;
+			for(int i=(TempListSPs.size()-1);i>0;i--)
+			{
+				if(TempListSPs.get(i).getLed().getColor().equals("black"))
+				{
+					
+					
+					if(TempListSPs.get(i-1).getLed().getColor().equals("red") || TempListSPs.get(i-1).getLed().getColor().equals("orange") || TempListSPs.get(i-1).getLed().getColor().equals("green"))
+					{
+							
+						if(TempListSPs.get(i) instanceof Equipment)
+						{
+							tempEquipment = (Equipment) TempListSPs.get(i);
+							TempListSPs.set(i, TempListSPs.get(i-1));
+							TempListSPs.set(i-1,tempEquipment);
+							order = false;
+							continue;
+						}
+						if(TempListSPs.get(i) instanceof Network)
+						{
+							tempNetwork = (Network) TempListSPs.get(i);
+							TempListSPs.set(i, TempListSPs.get(i-1));
+							TempListSPs.set(i-1,tempNetwork);
+							order = false;
+							continue;
+						}
+						if(TempListSPs.get(i) instanceof DataStorage)
+						{
+							tempDataStorage = (DataStorage) TempListSPs.get(i);
+							TempListSPs.set(i, TempListSPs.get(i-1));
+							TempListSPs.set(i-1,tempDataStorage);
+							order = false;
+							continue;
+						}											
+						
+					}					
+				}		
+				
+				if(TempListSPs.get(i).getLed().getColor().equals("red"))
+				{								
+					if(TempListSPs.get(i-1).getLed().getColor().equals("orange") || TempListSPs.get(i-1).getLed().getColor().equals("green"))
+					{
+							
+						if(TempListSPs.get(i) instanceof Equipment)
+						{
+							tempEquipment = (Equipment) TempListSPs.get(i);
+							TempListSPs.set(i, TempListSPs.get(i-1));
+							TempListSPs.set(i-1,tempEquipment);
+							order = false;
+							continue;
+						}
+						if(TempListSPs.get(i) instanceof Network)
+						{
+							tempNetwork = (Network) TempListSPs.get(i);
+							TempListSPs.set(i, TempListSPs.get(i-1));
+							TempListSPs.set(i-1,tempNetwork);
+							order = false;
+							continue;
+						}
+						if(TempListSPs.get(i) instanceof DataStorage)
+						{
+							tempDataStorage = (DataStorage) TempListSPs.get(i);
+							TempListSPs.set(i, TempListSPs.get(i-1));
+							TempListSPs.set(i-1,tempDataStorage);
+							order = false;
+							continue;
+						}
+						
+					}					
+				}	
+				
+				if(TempListSPs.get(i).getLed().getColor().equals("orange"))
+				{		
+					if(TempListSPs.get(i-1).getLed().getColor().equals("green"))
+					{
+							
+						if(TempListSPs.get(i) instanceof Equipment)
+						{
+							tempEquipment = (Equipment) TempListSPs.get(i);
+							TempListSPs.set(i, TempListSPs.get(i-1));
+							TempListSPs.set(i-1,tempEquipment);
+							order = false;
+							continue;
+						}
+						if(TempListSPs.get(i) instanceof Network)
+						{
+							tempNetwork = (Network) TempListSPs.get(i);
+							TempListSPs.set(i, TempListSPs.get(i-1));
+							TempListSPs.set(i-1,tempNetwork);
+							order = false;
+							continue;
+						}
+						
+						if(TempListSPs.get(i) instanceof DataStorage)
+						{
+							tempDataStorage = (DataStorage) TempListSPs.get(i);
+							TempListSPs.set(i, TempListSPs.get(i-1));
+							TempListSPs.set(i-1,tempDataStorage);
+							order = false;
+							continue;
+						}
+						
+					
+					}					
+				}
+				
+			}
+			
+		}while(order == false);
+		
+				
+		if(TempListSPs.size()>0+indexDisplay)
+		{			
+			this.labelIcon1.setVisible(true);
+			this.labelLed1.setVisible(true);
+			this.labelName1.setVisible(true);
+			this.checkBox_1.setVisible(true);
+			this.panel_c221.setVisible(true);
+			
+			ImageIcon icon = new ImageIcon(DatatypeConverter.parseBase64Binary(TempListSPs.get(0+indexDisplay).getIcon()));
+			Image image = icon.getImage();
+			Image newImage = icon.getImage().getScaledInstance(100, 80, Image.SCALE_DEFAULT);
+			this.setLabelIcon1(new ImageIcon(newImage));
+			
+			this.setLabelName1(TempListSPs.get(0+indexDisplay).getName());
+			this.setLabelLed1(new ImageIcon(SecondaryWindow.class.getResource(TempListSPs.get(0+indexDisplay).getLed().getUNC())));			
+		}
+		
+		if(TempListSPs.size()>1+indexDisplay)
+		{
+			this.labelIcon2.setVisible(true);
+			this.labelLed2.setVisible(true);
+			this.labelName2.setVisible(true);
+			this.checkBox_2.setVisible(true);
+			this.panel_c231.setVisible(true);
+
+			ImageIcon icon = new ImageIcon(DatatypeConverter.parseBase64Binary(TempListSPs.get(1+indexDisplay).getIcon()));
+			Image image = icon.getImage();
+			Image newImage = icon.getImage().getScaledInstance(100, 80, Image.SCALE_DEFAULT);
+			this.setLabelIcon2(new ImageIcon(newImage));
+
+			this.setLabelLed2(new ImageIcon(SecondaryWindow.class.getResource(TempListSPs.get(1+indexDisplay).getLed().getUNC())));
+			this.setLabelName2(TempListSPs.get(1+indexDisplay).getName());
+		}
+		
+		if(TempListSPs.size()>2+indexDisplay)
+		{
+			this.labelIcon3.setVisible(true);
+			this.labelLed3.setVisible(true);
+			this.labelName3.setVisible(true);
+			this.checkBox_3.setVisible(true);
+			this.panel_c241.setVisible(true);
+			
+			ImageIcon icon = new ImageIcon(DatatypeConverter.parseBase64Binary(TempListSPs.get(2+indexDisplay).getIcon()));
+			Image image = icon.getImage();
+			Image newImage = icon.getImage().getScaledInstance(100, 80, Image.SCALE_DEFAULT);
+			this.setLabelIcon3(new ImageIcon(newImage));
+			
+			this.setLabelLed3(new ImageIcon(SecondaryWindow.class.getResource(TempListSPs.get(2+indexDisplay).getLed().getUNC())));
+			this.setLabelName3(TempListSPs.get(2+indexDisplay).getName());
+		}
+		
+		if(TempListSPs.size()>3+indexDisplay)
+		{
+			this.labelIcon4.setVisible(true);
+			this.labelLed4.setVisible(true);
+			this.labelName4.setVisible(true);
+			this.checkBox_4.setVisible(true);
+			this.panel_c251.setVisible(true);
+			
+			ImageIcon icon = new ImageIcon(DatatypeConverter.parseBase64Binary(TempListSPs.get(3+indexDisplay).getIcon()));
+			Image image = icon.getImage();
+			Image newImage = icon.getImage().getScaledInstance(100, 80, Image.SCALE_DEFAULT);
+			this.setLabelIcon4(new ImageIcon(newImage));
+			
+			this.setLabelLed4(new ImageIcon(SecondaryWindow.class.getResource(TempListSPs.get(3+indexDisplay).getLed().getUNC())));
+			this.setLabelName4(TempListSPs.get(3+indexDisplay).getName());
+		}
+		
+		if(TempListSPs.size()>4+indexDisplay)
+		{
+			this.labelIcon5.setVisible(true);
+			this.labelLed5.setVisible(true);
+			this.labelName5.setVisible(true);
+			this.checkBox_5.setVisible(true);
+			this.panel_c261.setVisible(true);
+			
+			ImageIcon icon = new ImageIcon(DatatypeConverter.parseBase64Binary(TempListSPs.get(4+indexDisplay).getIcon()));
+			Image image = icon.getImage();
+			Image newImage = icon.getImage().getScaledInstance(100, 80, Image.SCALE_DEFAULT);
+			this.setLabelIcon5(new ImageIcon(newImage));
+			
+			this.setLabelLed5(new ImageIcon(SecondaryWindow.class.getResource(TempListSPs.get(4+indexDisplay).getLed().getUNC())));
+			this.setLabelName5(TempListSPs.get(4+indexDisplay).getName());
+		}
+		
+		if(TempListSPs.size()>5+indexDisplay)
+		{
+			this.labelIcon6.setVisible(true);
+			this.labelLed6.setVisible(true);
+			this.labelName6.setVisible(true);
+			this.checkBox_6.setVisible(true);
+			this.panel_c271.setVisible(true);
+			
+			ImageIcon icon = new ImageIcon(DatatypeConverter.parseBase64Binary(TempListSPs.get(5+indexDisplay).getIcon()));
+			Image image = icon.getImage();
+			Image newImage = icon.getImage().getScaledInstance(100, 80, Image.SCALE_DEFAULT);
+			this.setLabelIcon6(new ImageIcon(newImage));
+			
+			this.setLabelLed6(new ImageIcon(SecondaryWindow.class.getResource(TempListSPs.get(5+indexDisplay).getLed().getUNC())));
+			this.setLabelName6(TempListSPs.get(5+indexDisplay).getName());
+		}
+		
+		if(TempListSPs.size()>6+indexDisplay)
+		{
+			this.labelIcon7.setVisible(true);
+			this.labelLed7.setVisible(true);
+			this.labelName7.setVisible(true);
+			this.checkBox_7.setVisible(true);
+			this.panel_c281.setVisible(true);
+			
+			ImageIcon icon = new ImageIcon(DatatypeConverter.parseBase64Binary(TempListSPs.get(6+indexDisplay).getIcon()));
+			Image image = icon.getImage();
+			Image newImage = icon.getImage().getScaledInstance(100, 80, Image.SCALE_DEFAULT);
+			this.setLabelIcon7(new ImageIcon(newImage));
+			
+			this.setLabelLed7(new ImageIcon(SecondaryWindow.class.getResource(TempListSPs.get(6+indexDisplay).getLed().getUNC())));
+			this.setLabelName7(TempListSPs.get(6+indexDisplay).getName());
+		}
+		
+	}
+	
+	/////////////************************    ActionListener   *************************
+	@Override
+	public void actionPerformed(ActionEvent e) 
+	{		
+		if(e.getSource() == this.schemaButton) 
+		{	
+			
+			File file = new File("images/archi_reseau_category.jpg");
+		        
+	        //first check if Desktop is supported by Platform or not
+	        if(!Desktop.isDesktopSupported())
+	        {
+	            System.out.println("Desktop is not supported");
+	            return;
+	        }
+	        
+	        Desktop desktop = Desktop.getDesktop();
+	        if(file.exists()) 
+        	{
+	        	try 
+	        	{
+					desktop.open(file);
+				} catch (IOException e1) 
+	        	{
+					
+					e1.printStackTrace();
+				}
+        	}   
+		}
+		
+	
+		if(e.getSource() == this.previousButton) 
+		{	
+		
+			System.out.println("previousButton clické");
+			if(this.indexDisplay-7<=-6)
+			{
+				JOptionPane.showMessageDialog(this,"Début de liste atteinte","Information",JOptionPane.INFORMATION_MESSAGE);	
+			}
+			else
+			{
+				this.indexDisplay=this.indexDisplay-7;
+				if(this.indexDisplay<=0)
+				{
+					this.indexDisplay=0;
+				}
+				this.displaySPs(this.listSPs,this.indexDisplay);
+			}
+	
+		}
+		
+		/**
+		 * Event for MainWindow
+		 * @param e : Action when click on NextButton to modify list display
+		 */
+		if(e.getSource() == this.nextButton) 
+		{		
+			if(this.indexDisplay+7>listSPs.size())
+			{
+				JOptionPane.showMessageDialog(this,"Fin de la liste atteinte","Information",JOptionPane.INFORMATION_MESSAGE);	
+			}
+			else
+			{
+				this.indexDisplay=this.indexDisplay+7;
+				this.displaySPs(this.listSPs,this.indexDisplay);
+			}		
+		}
+
+	}
+	
+
+	
+	/////////////************************    Getters and Setters *************************
+	
+	public void setLabelIcon1(ImageIcon labelIcon1) {
+		this.labelIcon1.setIcon(labelIcon1); 
+	}
+
+	public void setLabelIcon2(ImageIcon labelIcon2) {
+		this.labelIcon2.setIcon(labelIcon2); 
+	}
+
+	public void setLabelIcon3(ImageIcon labelIcon3) {
+		this.labelIcon3.setIcon(labelIcon3); 
+	}
+
+	public void setLabelIcon4(ImageIcon labelIcon4) {
+		this.labelIcon4.setIcon(labelIcon4); 
+	}
+
+	public void setLabelIcon5(ImageIcon labelIcon5) {
+		this.labelIcon5.setIcon(labelIcon5); 
+	}
+
+	public void setLabelIcon6(ImageIcon labelIcon6) {
+		this.labelIcon6.setIcon(labelIcon6); 
+	}
+
+	public void setLabelIcon7(ImageIcon labelIcon7) {
+		this.labelIcon7.setIcon(labelIcon7); 
+	}
+
+	public void setLabelLed1(ImageIcon labelLed1) {
+		this.labelLed1.setIcon(labelLed1); 
+	}
+
+	public void setLabelLed2(ImageIcon labelLed2) {
+		this.labelLed2.setIcon(labelLed2);
+	}
+
+	public void setLabelLed3(ImageIcon labelLed3) {
+		this.labelLed3.setIcon(labelLed3);
+	}
+
+	public void setLabelLed4(ImageIcon labelLed4) {
+		this.labelLed4.setIcon(labelLed4);
+	}
+
+	public void setLabelLed5(ImageIcon labelLed5) {
+		this.labelLed5.setIcon(labelLed5);
+	}
+
+	public void setLabelLed6(ImageIcon labelLed6) {
+		this.labelLed6.setIcon(labelLed6);
+	}
+
+	public void setLabelLed7(ImageIcon labelLed7) {
+		this.labelLed7.setIcon(labelLed7);
+	}
+
+	public void setLabelName1(String labelName1) {
+		this.labelName1.setText(labelName1);
+	}
+
+	public void setLabelName2(String labelName2) {
+		this.labelName2.setText(labelName2);
+	}
+
+	public void setLabelName3(String labelName3) {
+		this.labelName3.setText(labelName3);
+	}
+
+	public void setLabelName4(String labelName4) {
+		this.labelName4.setText(labelName4);
+	}
+
+	public void setLabelName5(String labelName5) {
+		this.labelName5.setText(labelName5);
+	}
+
+	public void setLabelName6(String labelName6) {
+		this.labelName6.setText(labelName6);
+	}
+
+	public void setLabelName7(String labelName7) {
+		this.labelName7.setText(labelName7);
+	}
+
+	public JCheckBox getCheckBox_1() {
+		return checkBox_1;
+	}
+
+	public void setCheckBox_1(JCheckBox checkBox_1) {
+		this.checkBox_1 = checkBox_1;
+	}
+
+	public JCheckBox getCheckBox_2() {
+		return checkBox_2;
+	}
+
+	public void setCheckBox_2(JCheckBox checkBox_2) {
+		this.checkBox_2 = checkBox_2;
+	}
+
+	public JCheckBox getCheckBox_3() {
+		return checkBox_3;
+	}
+
+	public void setCheckBox_3(JCheckBox checkBox_3) {
+		this.checkBox_3 = checkBox_3;
+	}
+
+	public JCheckBox getCheckBox_4() {
+		return checkBox_4;
+	}
+
+	public void setCheckBox_4(JCheckBox checkBox_4) {
+		this.checkBox_4 = checkBox_4;
+	}
+
+	public JCheckBox getCheckBox_5() {
+		return checkBox_5;
+	}
+
+	public void setCheckBox_5(JCheckBox checkBox_5) {
+		this.checkBox_5 = checkBox_5;
+	}
+
+	public JCheckBox getCheckBox_6() {
+		return checkBox_6;
+	}
+
+	public void setCheckBox_6(JCheckBox checkBox_6) {
+		this.checkBox_6 = checkBox_6;
+	}
+
+	public JCheckBox getCheckBox_7() {
+		return checkBox_7;
+	}
+
+	public void setCheckBox_7(JCheckBox checkBox_7) {
+		this.checkBox_7 = checkBox_7;
+	}
+
+	public int getIndexDisplay() {
+		return indexDisplay;
+	}
+
+	public void setIndexDisplay(int indexDisplay) {
+		this.indexDisplay = indexDisplay;
+	}
+
+	public JLabel getLabelName1() {
+		return labelName1;
+	}
+
+	public void setLabelName1(JLabel labelName1) {
+		this.labelName1 = labelName1;
+	}
+
+	public JLabel getLabelName2() {
+		return labelName2;
+	}
+
+	public void setLabelName2(JLabel labelName2) {
+		this.labelName2 = labelName2;
+	}
+
+	public JLabel getLabelName3() {
+		return labelName3;
+	}
+
+	public void setLabelName3(JLabel labelName3) {
+		this.labelName3 = labelName3;
+	}
+
+	public JLabel getLabelName4() {
+		return labelName4;
+	}
+
+	public void setLabelName4(JLabel labelName4) {
+		this.labelName4 = labelName4;
+	}
+
+	public JLabel getLabelName5() {
+		return labelName5;
+	}
+
+	public void setLabelName5(JLabel labelName5) {
+		this.labelName5 = labelName5;
+	}
+
+	public JLabel getLabelName6() {
+		return labelName6;
+	}
+
+	public void setLabelName6(JLabel labelName6) {
+		this.labelName6 = labelName6;
+	}
+
+	public JLabel getLabelName7() {
+		return labelName7;
+	}
+
+	public void setLabelName7(JLabel labelName7) {
+		this.labelName7 = labelName7;
+	}
+
+	public JPanel getPanel_c22() {
+		return panel_c22;
+	}
+
+	public void setPanel_c22(JPanel panel_c22) {
+		this.panel_c22 = panel_c22;
+	}
+
+	public JPanel getPanel_c23() {
+		return panel_c23;
+	}
+
+	public void setPanel_c23(JPanel panel_c23) {
+		this.panel_c23 = panel_c23;
+	}
+
+	public JPanel getPanel_c24() {
+		return panel_c24;
+	}
+
+	public void setPanel_c24(JPanel panel_c24) {
+		this.panel_c24 = panel_c24;
+	}
+
+	public JPanel getPanel_c25() {
+		return panel_c25;
+	}
+
+	public void setPanel_c25(JPanel panel_c25) {
+		this.panel_c25 = panel_c25;
+	}
+
+	public JPanel getPanel_c26() {
+		return panel_c26;
+	}
+
+	public void setPanel_c26(JPanel panel_c26) {
+		this.panel_c26 = panel_c26;
+	}
+
+	public JPanel getPanel_c27() {
+		return panel_c27;
+	}
+
+	public void setPanel_c27(JPanel panel_c27) {
+		this.panel_c27 = panel_c27;
+	}
+
+	public JPanel getPanel_c28() {
+		return panel_c28;
+	}
+
+	public void setPanel_c28(JPanel panel_c28) {
+		this.panel_c28 = panel_c28;
+	}
+
+	public JPanel getPanel_c221() {
+		return panel_c221;
+	}
+
+	public void setPanel_c221(JPanel panel_c221) {
+		this.panel_c221 = panel_c221;
+	}
+
+	public JPanel getPanel_c231() {
+		return panel_c231;
+	}
+
+	public void setPanel_c231(JPanel panel_c231) {
+		this.panel_c231 = panel_c231;
+	}
+
+	public JPanel getPanel_c241() {
+		return panel_c241;
+	}
+
+	public void setPanel_c241(JPanel panel_c241) {
+		this.panel_c241 = panel_c241;
+	}
+
+	public JPanel getPanel_c251() {
+		return panel_c251;
+	}
+
+	public void setPanel_c251(JPanel panel_c251) {
+		this.panel_c251 = panel_c251;
+	}
+
+	public JPanel getPanel_c271() {
+		return panel_c271;
+	}
+
+	public void setPanel_c271(JPanel panel_c271) {
+		this.panel_c271 = panel_c271;
+	}
+
+	public JPanel getPanel_c261() {
+		return panel_c261;
+	}
+
+	public void setPanel_c261(JPanel panel_c261) {
+		this.panel_c261 = panel_c261;
+	}
+
+	public JPanel getPanel_c281() {
+		return panel_c281;
+	}
+
+	public void setPanel_c281(JPanel panel_c281) {
+		this.panel_c281 = panel_c281;
+	}
+
+
+	
+}
